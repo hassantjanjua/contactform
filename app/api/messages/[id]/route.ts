@@ -5,14 +5,12 @@ import Message from "@/models/contact"
 // ✅ GET ONE
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB()
 
-    const { id } = await params
-
-    const message = await Message.findById(id)
+    const message = await Message.findById(params.id)
 
     if (!message) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -27,16 +25,15 @@ export async function GET(
 // ✅ UPDATE
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB()
 
-    const { id } = await params
     const body = await req.json()
 
     const updated = await Message.findByIdAndUpdate(
-      id,
+      params.id,
       body,
       { new: true }
     )
@@ -54,14 +51,12 @@ export async function PUT(
 // ✅ DELETE
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB()
 
-    const { id } = await params
-
-    const deleted = await Message.findByIdAndDelete(id)
+    const deleted = await Message.findByIdAndDelete(params.id)
 
     if (!deleted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
