@@ -1,17 +1,32 @@
 import mongoose from "mongoose"
 
-const MessageSchema = new mongoose.Schema(
-  {
-    name: String,
-    email: String,
-    phone: String,
-    company: String,
-    subject: String,
-    message: String,
-  },
-  { timestamps: true }
-)
+const ContactSchema = new mongoose.Schema({
 
-// ❗ overwrite fix
-export default mongoose.models.Message ||
-  mongoose.model("Message", MessageSchema)
+  name: {
+    type: String,
+    required: true
+  },
+
+  email: {
+    type: String,
+    required: true
+  },
+
+  phone: String,
+  company: String,
+  subject: String,
+
+  message: {
+    type: String,
+    required: true
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+
+})
+
+export default mongoose.models.Contact ||
+mongoose.model("Contact", ContactSchema)
