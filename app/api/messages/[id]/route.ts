@@ -1,16 +1,26 @@
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
 import { connectDB } from "@/lib/mongodb"
 import Message from "@/models/contact"
 
+// Helper to unwrap params if it's a Promise
+async function getParams(params: { id: string } | Promise<{ id: string }>) {
+  if ("then" in params) {
+    return await params
+  }
+  return params
+}
+
 // ✅ GET ONE
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
-    const message = await Message.findById(params.id)
+    const { id } = await getParams(params)
+
+    const message = await Message.findById(id)
 
     if (!message) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -24,19 +34,16 @@ export async function GET(
 
 // ✅ UPDATE
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
+    const { id } = await getParams(params)
     const body = await req.json()
 
-    const updated = await Message.findByIdAndUpdate(
-      params.id,
-      body,
-      { new: true }
-    )
+    const updated = await Message.findByIdAndUpdate(id, body, { new: true })
 
     if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -50,13 +57,15 @@ export async function PUT(
 
 // ✅ DELETE
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
-    const deleted = await Message.findByIdAndDelete(params.id)
+    const { id } = await getParams(params)
+
+    const deleted = await Message.findByIdAndDelete(id)
 
     if (!deleted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
