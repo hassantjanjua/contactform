@@ -2,24 +2,19 @@ import { NextResponse, NextRequest } from "next/server"
 import { connectDB } from "@/lib/mongodb"
 import Message from "@/models/contact"
 
-// Helper to handle params (unwrapping Promise if needed)
-async function getParams(params: { id: string } | Promise<{ id: string }>) {
-  if ("then" in params) return await params
-  return params
-}
-
 // ✅ GET ONE
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } | Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB()
-    const { id } = await getParams(params)
-    const message = await Message.findById(id)
 
-    if (!message)
+    const message = await Message.findById(params.id)
+
+    if (!message) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
 
     return NextResponse.json(message)
   } catch (error) {
@@ -30,17 +25,20 @@ export async function GET(
 // ✅ UPDATE
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } | Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB()
-    const { id } = await getParams(params)
+
     const body = await req.json()
 
-    const updated = await Message.findByIdAndUpdate(id, body, { new: true })
+    const updated = await Message.findByIdAndUpdate(params.id, body, {
+      new: true,
+    })
 
-    if (!updated)
+    if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
 
     return NextResponse.json(updated)
   } catch (error) {
@@ -54,16 +52,16 @@ export async function PUT(
 // ✅ DELETE
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } | Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB()
-    const { id } = await getParams(params)
 
-    const deleted = await Message.findByIdAndDelete(id)
+    const deleted = await Message.findByIdAndDelete(params.id)
 
-    if (!deleted)
+    if (!deleted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
